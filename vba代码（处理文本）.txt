@@ -1,0 +1,127 @@
+Sub 清空()
+Application.ScreenUpdating = False
+Application.DisplayAlerts = False
+Dim i As Integer
+For i = 1 To Sheets.Count
+    If Sheets.Count > 1 Then
+    Sheets(Sheets.Count).Delete
+End If
+Next
+Cells.Select
+Selection.ClearContents
+Range("a1").Select
+'‘定义格式
+    Columns("A:A").Select
+    Selection.NumberFormatLocal = "@"
+    Columns("B:B").Select
+    Selection.NumberFormatLocal = "0_);[红色](0)"
+End Sub
+
+Sub 文字提取() ' the first step
+Application.ScreenUpdating = False
+Application.DisplayAlerts = False
+Range("a1:a" & 4).EntireRow.Delete ' 删除前面的四行
+
+'‘替换空格
+Cells.Replace What:=" ", Replacement:="", LookAt:=xlPart, SearchOrder:= _
+        xlByRows, MatchCase:=False, SearchFormat:=False, ReplaceFormat:=False
+'‘替换问号逗号句号
+Cells.Replace What:="？", Replacement:="", LookAt:=xlPart, SearchOrder:= _
+        xlByRows, MatchCase:=False, SearchFormat:=False, ReplaceFormat:=False
+Cells.Replace What:="，", Replacement:="", LookAt:=xlPart, SearchOrder:= _
+        xlByRows, MatchCase:=False, SearchFormat:=False, ReplaceFormat:=False
+Cells.Replace What:="#VALUE!", Replacement:="", LookAt:=xlPart, SearchOrder:= _
+        xlByRows, MatchCase:=False, SearchFormat:=False, ReplaceFormat:=False
+Cells.Replace What:=",", Replacement:="", LookAt:=xlPart, SearchOrder:= _
+        xlByRows, MatchCase:=False, SearchFormat:=False, ReplaceFormat:=False
+Cells.Replace What:="!", Replacement:="", LookAt:=xlPart, SearchOrder:= _
+        xlByRows, MatchCase:=False, SearchFormat:=False, ReplaceFormat:=False
+Cells.Replace What:=" ", Replacement:="", LookAt:=xlPart, SearchOrder:= _
+        xlByRows, MatchCase:=False, SearchFormat:=False, ReplaceFormat:=False
+Cells.Replace What:="          ", Replacement:="", LookAt:=xlPart, SearchOrder:= _
+        xlByRows, MatchCase:=False, SearchFormat:=False, ReplaceFormat:=False
+Cells.Replace What:=".", Replacement:="", LookAt:=xlPart, SearchOrder:= _
+        xlByRows, MatchCase:=False, SearchFormat:=False, ReplaceFormat:=False
+Cells.Replace What:="]", Replacement:="", LookAt:=xlPart, SearchOrder:= _
+        xlByRows, MatchCase:=False, SearchFormat:=False, ReplaceFormat:=False
+Cells.Replace What:="}", Replacement:="", LookAt:=xlPart, SearchOrder:= _
+        xlByRows, MatchCase:=False, SearchFormat:=False, ReplaceFormat:=False
+Cells.Replace What:="""", Replacement:="", LookAt:=xlPart, SearchOrder:= _
+        xlByRows, MatchCase:=False, SearchFormat:=False, ReplaceFormat:=False
+
+Dim i As Integer
+For i = Range("a65536").End(xlUp).Row To 1 Step -1
+    If Range("a" & i) = "" Then
+    Range("a" & i).EntireRow.Delete
+    End If
+    Next
+
+End Sub
+Sub 计算频率并排序同时拷贝为文本()
+Application.ScreenUpdating = False
+Dim h As Integer
+For h = 1 To Range("a65536").End(xlUp).Row
+Range("b" & h) = "=COUNTIF($A$1:$A$" & Range("a65536").End(xlUp).Row & ",A" & h & ")"
+Next
+Columns("b:b").copy ' 复制d列
+Columns("b:b").Select ' 粘贴b列为文本
+    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+        :=False, Transpose:=False
+Range("a1").Select
+Application.ScreenUpdating = False
+    Columns("A:P").Select
+    Range("B1").Activate
+    ActiveWorkbook.Worksheets(Sheets.Count).Sort.SortFields.Clear
+    ActiveWorkbook.Worksheets(Sheets.Count).Sort.SortFields.Add2 Key:=Range("B1:B" & Range("a65536").End(xlUp).Row & "" _
+        ), SortOn:=xlSortOnValues, Order:=xlDescending, DataOption:=xlSortNormal
+        ActiveWorkbook.Worksheets(Sheets.Count).Sort.SortFields.Add2 Key:=Range( _
+        "A1:A" & Range("a65536").End(xlUp).Row & ""), SortOn:=xlSortOnValues, Order:=xlAscending, DataOption:= _
+        xlSortNormal
+    With ActiveWorkbook.Worksheets(Sheets.Count).Sort
+        .SetRange Range("A1:P" & Range("a65536").End(xlUp).Row & "")
+        .Header = xlGuess
+        .MatchCase = False
+        .Orientation = xlTopToBottom
+        .SortMethod = xlPinYin
+        .Apply
+    
+    End With
+Range("A:B").copy Range("C:D")
+
+End Sub
+Sub 删除空行()
+Application.DisplayAlerts = False
+Application.ScreenUpdating = False
+Dim i As Integer
+For i = Range("a65536").End(xlUp).Row To 1
+    If Range("a" & i) = "          " Or Range("a" & i) = "" Then
+    Range("a" & i).EntireRow.Delete
+    End If
+    Next
+    
+
+End Sub
+Sub 删除重复内容并生成数量表()
+Application.ScreenUpdating = False
+Application.DisplayAlerts = False
+
+Dim i As Integer
+For i = Range("c65536").End(xlUp).Row To 2 Step -1
+    If Range("c" & i) = Range("c" & i - 1) Then
+    Range("c" & i) = ""
+    End If
+    Next
+For i = Range("c65536").End(xlUp).Row To 2 Step -1
+    If Range("c" & i) = "" Then
+    Range("c" & i & ":d" & i).Delete Shift:=xlUp
+    End If
+    Next
+
+For i = 1 To Range("c65536").End(xlUp).Row
+    Range("e" & i) = "=D" & i & "/SUM(D:D)"
+    Range("e" & i).NumberFormatLocal = "0.000%"
+Next
+
+End Sub
+
+
